@@ -1,10 +1,15 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ProductEntity } from './db-entity/product.entity';
 import { Repository } from 'typeorm';
 import { Product } from './zod/zod';
 import { CreateProductDto } from './dto/create-product.dto';
 import { FilesService } from 'src/files/files.service';
+import { DeleteProductDto } from './dto/delete-product.dto';
 
 @Injectable()
 export class ProductsService {
@@ -38,5 +43,15 @@ export class ProductsService {
 
   async getAll(): Promise<Product[]> {
     return this.repo.find();
+  }
+
+  async delete(dto: DeleteProductDto) {
+    const product = await this.repo.findOneBy(dto);
+    if (!product) throw new NotFoundException('Продукт не найден');
+    await Promise.all(
+      product.images.map((url) => this.filesService.deleteFile(url)),
+    );
+    await this.repo.delete(dto);
+    return { massage: 'success' };
   }
 }

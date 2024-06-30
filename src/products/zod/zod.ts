@@ -16,3 +16,8 @@ export const CreateProductZod = ZodProduct.pick({
   price: true,
 }).partial({ description: true });
 export type CreateProduct = z.infer<typeof CreateProductZod>;
+
+export const DeleteProductZod = ZodProduct.pick({
+  id: true,
+});
+export type DeleteProduct = z.infer<typeof DeleteProductZod>;
